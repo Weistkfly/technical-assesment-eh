@@ -165,7 +165,7 @@ function renderCryptoCards(dataToRender) {
                     </div>
                     <div class="crypto-main-details">
                         <p class="crypto-price">${formattedDisplayPrice} ${currencyCodeHtml}</p>
-                        <p class="crypto-change"><strong>24h Change:</strong> ${trendHtml}</p>
+                        <p class="crypto-change"><strong>Trend:</strong> ${trendHtml}</p>
                     </div>
                     <div class="crypto-footer-details">
                          <p><small><strong>Last Updated:</strong> ${lastUpdatedLocal}</small></p>
