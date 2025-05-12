@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using CryptoPriceTracker.Api.Services;
 using CryptoPriceTracker.Api.Data;
+using System.Threading;
+using CryptoPriceTracker.Api.Models;
 
 namespace CryptoPriceTracker.Api.Controllers
 {
@@ -9,11 +11,13 @@ namespace CryptoPriceTracker.Api.Controllers
     public class CryptoController : ControllerBase
     {
         private readonly CryptoPriceService _service;
+        private readonly ILogger<CryptoController> _logger;
 
         // Constructor with dependency injection of the service
-        public CryptoController(CryptoPriceService service)
+        public CryptoController(CryptoPriceService service, ILogger<CryptoController> logger)
         {
             _service = service;
+            _logger = logger;
         }
 
         /// <summary>
@@ -23,12 +27,28 @@ namespace CryptoPriceTracker.Api.Controllers
         /// </summary>
         /// <returns>200 OK with a confirmation message once done</returns>
         [HttpPost("update-prices")]
-        public async Task<IActionResult> UpdatePrices()
+        public async Task<IActionResult> UpdatePrices(CancellationToken cancellationToken)
         {
-            // Uncomment and call the service here
-            // await _service.UpdatePricesAsync();
+            _logger.LogInformation("Attempting to initiate cryptocurrency price update.");
 
-            return Ok("Prices updated."); // Optional: Replace with a real result message
+            try
+            {
+                await _service.UpdatePricesAsync(cancellationToken);
+
+                string result = "Cryptocurrency price update process initiated successfully.";
+                return Ok(result);
+            }
+            catch (OperationCanceledException ex) when (cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogWarning(ex, "Price update operation was cancelled by the client.");
+                return NoContent(); 
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = "An unexpected error occurred while updating cryptocurrency prices.";
+                _logger.LogError(ex, "{errorMessage}", errorMessage);
+                return StatusCode(500, errorMessage);
+            }
         }
 
         /// <summary>
@@ -36,22 +56,28 @@ namespace CryptoPriceTracker.Api.Controllers
         /// This will allow the frontend to display the most recent data saved in the database.
         /// </summary>
         /// <returns>A list of assets and their latest recorded price</returns>
-        // [HttpGet("latest-prices")]
-        // public async Task<IActionResult> GetLatestPrices([FromServices] ApplicationDbContext db)
-        // {
-        //     // Sample logic (you can customize this query as needed):
-        //     var latest = await db.CryptoAssets
-        //         .Select(asset => new {
-        //             asset.Name,
-        //             asset.Symbol,
-        //             asset.ExternalId,
-        //             Price = asset.PriceHistory
-        //                 .OrderByDescending(p => p.Date)
-        //                 .FirstOrDefault().Price
-        //         })
-        //         .ToListAsync();
+        [HttpGet("latest-prices")]
+        public async Task<IActionResult> GetLatestPrices(CancellationToken cancellationToken)
+        {
+            try
+            {
+                _logger.LogInformation("Request received for latest crypto prices.");
 
-        //     return Ok(latest);
-        // }
+                List<CryptoAssetViewModel> latestPrices = await _service.GetPricesAsync(cancellationToken);
+
+                _logger.LogInformation("Successfully retrieved {Count} latest crypto prices.", latestPrices.Count);
+                return Ok(latestPrices);
+            }
+            catch (OperationCanceledException ex)
+            {
+                _logger.LogInformation(ex, "Operation to get latest prices was canceled.");
+                return NoContent(); 
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching latest crypto prices.");
+                return StatusCode(500, "An unexpected error occurred while processing your request.");
+            }
+        }
     }
 }

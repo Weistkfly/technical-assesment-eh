@@ -1,18 +1,51 @@
 @{
-    ViewData["Title"] = "Crypto Price Tracker";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Crypto Price Tracker - Real-time Prices & Trends";
 }
 
-<h1>Crypto Price Tracker</h1>
+<div class="app-container">
+    <header class="app-header">
+        <div class="logo-title">
+            <span class="header-logo-placeholder" aria-hidden="true">⭐</span>
+            <h1>Crypto Price Tracker</h1>
+        </div>
+        <button id="updateBtn" class="btn btn-secondary btn-lg">
+            <span class="btn-text">Update Prices</span>
+            <span class="spinner btn-spinner" style="display: none;" aria-hidden="true"></span>
+        </button>
+    </header>
 
-<button id="updateBtn">Update Prices</button>
-<div id="statusMessage"></div>
+    <section class="controls-area mb-3" aria-labelledby="controls-heading">
+        <h2 id="controls-heading" class="visually-hidden">Filtering and Display Controls</h2>
+        <div class="form-control-wrapper">
+            <span class="search-icon-placeholder" aria-hidden="true">🔍</span>
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by name or symbol..." aria-label="Search cryptocurrencies by name or symbol">
+        </div>
 
-<script>
-    document.getElementById("updateBtn").addEventListener("click", async () => {
-        const response = await fetch("/api/crypto/update-prices", {
-            method: "POST"
-        });
-        const message = response.ok ? "✅ Prices updated!" : "❌ Failed to update.";
-        document.getElementById("statusMessage").innerText = message;
-    });
-</script>
+        <div class="sort-options-group">
+            <label for="sortSelect">Sort by:</label>
+            <select id="sortSelect" class="form-select" aria-label="Sort cryptocurrencies by criteria">
+                <option value="default">Default</option>
+                <option value="name_asc">Name (A-Z)</option>
+                <option value="name_desc">Name (Z-A)</option>
+                <option value="price_asc">Price (Low-High)</option>
+                <option value="price_desc">Price (High-Low)</option>
+                <option value="change_asc">24h Change (Low-High)</option>
+                <option value="change_desc">24h Change (High-Low)</option>
+            </select>
+        </div>
+        <button id="toggleThemeBtn" class="btn btn-secondary" aria-pressed="false">Toggle Theme</button>
+    </section>
+
+    <main id="main-content">
+        <div id="cryptoGridContainer" class="row" aria-live="polite" aria-atomic="true">
+            <p class="col-12 text-center p-5">Loading crypto data...</p>
+        </div>
+
+        <nav id="paginationContainer" class="pagination-container" aria-label="Page navigation for crypto assets">
+        </nav>
+    </main>
+</div>
+
+<div id="toastContainer" class="toast-container" aria-live="assertive" aria-atomic="true">
+</div>
