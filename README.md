@@ -130,23 +130,23 @@ as long as:
 
 Before submitting your solution, please ensure the following items are completed:
 
-- [ ] `CryptoPriceService.cs` fetches, saves, and avoids duplicates correctly
-- [ ] `namespace` declarations are consistent and correct across all files
-- [ ] `POST /api/crypto/update-prices` endpoint is functional
-- [ ] `GET /api/crypto/latest-prices` endpoint returns most recent prices
-- [ ] `IconUrl` property added to `CryptoAsset` model and stored in DB
-- [ ] Razor page (`Index.cshtml`) includes:
-  - [ ] Name
-  - [ ] Symbol
-  - [ ] Current Price and currency
-  - [ ] Icon
-  - [ ] Last Updated (adjusted to client timezone)
-  - [ ] Trend (up/down indicator and optional percentage change)
-- [ ] Button updates data and refreshes the view
-- [ ] Clear UI feedback after update attempts (success/failure)
-- [ ] Validation/error handling is implemented where needed
-- [ ] At least one unit test demonstrates validation or service logic
-- [ ] Comments provided for any assumptions or technical decisions
+- [✅] `CryptoPriceService.cs` fetches, saves, and avoids duplicates correctly
+- [✅] `namespace` declarations are consistent and correct across all files
+- [✅] `POST /api/crypto/update-prices` endpoint is functional
+- [✅] `GET /api/crypto/latest-prices` endpoint returns most recent prices
+- [✅] `IconUrl` property added to `CryptoAsset` model and stored in DB
+- [✅] Razor page (`Index.cshtml`) includes:
+  - [✅] Name
+  - [✅] Symbol
+  - [✅] Current Price and currency
+  - [✅] Icon
+  - [✅] Last Updated (adjusted to client timezone)
+  - [✅] Trend (up/down indicator and optional percentage change)
+- [✅] Button updates data and refreshes the view
+- [✅] Clear UI feedback after update attempts (success/failure)
+- [✅] Validation/error handling is implemented where needed
+- [✅] At least one unit test demonstrates validation or service logic
+- [✅] Comments provided for any assumptions or technical decisions
 
 ---
 

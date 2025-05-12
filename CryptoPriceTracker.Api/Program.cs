@@ -1,3 +1,8 @@
+using CryptoPriceTracker.Api.Data;
+using CryptoPriceTracker.Api.Models;
+using CryptoPriceTracker.Api.Services;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews().AddNewtonsoftJson();
@@ -7,6 +12,9 @@ builder.Services.AddScoped<CryptoPriceService>();
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.Configure<CoinGeckoApiOptions>(
+    builder.Configuration.GetSection("CoinGeckoApi"));
+builder.Services.AddSingleton<CacheService>();
 
 var app = builder.Build();
 

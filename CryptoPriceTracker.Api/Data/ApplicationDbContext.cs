@@ -13,10 +13,30 @@ namespace CryptoPriceTracker.Api.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CryptoAsset>().HasData(
-                new CryptoAsset { Id = 1, Name = "Bitcoin", Symbol = "BTC", ExternalId = "bitcoin" },
-                new CryptoAsset { Id = 2, Name = "Ethereum", Symbol = "ETH", ExternalId = "ethereum" }
-            );
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<CryptoAsset>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.Symbol).IsRequired();
+                entity.Property(e => e.ExternalId).IsRequired();
+                entity.Property(e => e.Currency).IsRequired();
+                entity.Property(e => e.IconUrl).IsRequired();
+               
+            });
+
+            modelBuilder.Entity<CryptoPriceHistory>(entity =>
+            {
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
+                entity.Property(e => e.Price).IsRequired();
+                entity.Property(e => e.Date).IsRequired();
+
+                entity.HasOne(d => d.CryptoAsset) 
+                      .WithMany(p => p.PriceHistory) 
+                      .HasForeignKey(d => d.CryptoAssetId) 
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }
