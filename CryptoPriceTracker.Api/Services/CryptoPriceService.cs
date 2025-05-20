@@ -417,18 +417,23 @@ namespace CryptoPriceTracker.Api.Services
                 cancellationToken.ThrowIfCancellationRequested();
 
                 // Step 3: Gather price history for the last 30 days for each top N coin
-                // Group by Date to get one entry per day (average price for that day)
-                var dailyPriceHistory = await _dbContext.CryptoPriceHistories
+                // First, fetch raw data from DB
+                var rawPriceHistoryForAsset = await _dbContext.CryptoPriceHistories
                     .AsNoTracking()
                     .Where(ph => ph.CryptoAssetId == assetInfo.Id && ph.Date >= thirtyDaysAgo)
-                    .GroupBy(ph => ph.Date.Date) // Group by the date part only
-                    .Select(g => new PriceDataPoint 
-                    { 
-                        Date = g.Key, 
-                        Price = g.Average(p => p.Price) // Taking average for the day
+                    .Select(ph => new { ph.Date, ph.Price }) // Select only necessary fields
+                    .ToListAsync(cancellationToken);
+
+                // Then, perform grouping and averaging in-memory
+                var dailyPriceHistory = rawPriceHistoryForAsset
+                    .GroupBy(h => h.Date.Date) // Group by the date part
+                    .Select(g => new PriceDataPoint
+                    {
+                        Date = g.Key,
+                        Price = g.Average(ph => ph.Price) // This now uses LINQ to Objects
                     })
                     .OrderBy(pdp => pdp.Date)
-                    .ToListAsync(cancellationToken);
+                    .ToList();
                 
                 if (!dailyPriceHistory.Any())
                 {
