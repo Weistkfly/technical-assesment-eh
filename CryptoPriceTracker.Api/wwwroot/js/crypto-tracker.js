@@ -525,4 +525,41 @@ function init() {
 }
 
 // --- Run Initialization ---
+// Redefine DOM element references within init or ensure they are checked before use if accessed globally.
+// For functions like showToast that use toastContainer, it's assumed to be globally available if used.
+function init() {
+    // Global theme application
+    const savedTheme = localStorage.getItem('cryptoTrackerTheme');
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(savedTheme || (prefersDark ? 'dark' : 'light')); 
+
+    // Listener for theme toggle button (if it exists on any page)
+    // Re-fetch toggleThemeBtn here as its existence might be page-dependent.
+    const pageToggleThemeBtn = document.getElementById("toggleThemeBtn");
+    pageToggleThemeBtn?.addEventListener('click', handleToggleThemeClick);
+
+    // Check if we are on a page that includes the main crypto tracking elements (Index.cshtml)
+    // Re-fetch cryptoContainer here to gate Index.cshtml specific logic.
+    const pageCryptoContainer = document.getElementById('cryptoGridContainer');
+    if (pageCryptoContainer) {
+        // References to elements specific to Index.cshtml
+        // Re-fetch these elements or ensure global consts are only used if pageCryptoContainer exists.
+        const pageUpdateBtn = document.getElementById("updateBtn");
+        const pageSearchInput = document.getElementById("searchInput");
+        const pageSortSelect = document.getElementById("sortSelect");
+        // paginationContainer is already checked internally by renderPaginationControls
+        // btnText and btnSpinner are derived from updateBtn, ensure handleUpdatePricesClick checks them or updateBtn itself.
+
+        // Event listeners for Index.cshtml elements
+        pageUpdateBtn?.addEventListener("click", handleUpdatePricesClick);
+        pageSearchInput?.addEventListener("input", debounce(handleSearchOrSortChange, CONFIG.DEBOUNCE_DELAY));
+        pageSortSelect?.addEventListener("change", handleSearchOrSortChange);
+
+        // Initial data load for Index.cshtml
+        // fetchAndDisplayPrices internally checks for cryptoContainer (which is pageCryptoContainer here)
+        // and other elements like updateBtn.
+        fetchAndDisplayPrices(); 
+    }
+}
+
 document.addEventListener("DOMContentLoaded", init);
