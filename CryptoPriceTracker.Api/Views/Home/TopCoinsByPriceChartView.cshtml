@@ -1,0 +1,24 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Top 10 Coins by Price - Chart";
+}
+
+<div class="container mt-4">
+    <header class="text-center mb-4">
+        <h1>Top 10 Cryptocurrencies by Current Price</h1>
+    </header>
+
+    <section class="chart-container mb-4" style="max-width: 900px; margin: auto;">
+        <canvas id="topCoinsChartCanvas" aria-label="Price chart of top 10 cryptocurrencies" role="img"></canvas>
+    </section>
+
+    <div class="text-center">
+        <p class="text-muted">Chart displays price history for the last 30 days.</p>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-primary">Back to Main Tracker</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="~/js/top-coins-by-price-chart.js" defer></script>
+}

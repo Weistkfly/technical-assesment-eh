@@ -8,5 +8,10 @@ namespace CryptoPriceTracker.Api.Controllers
         {
             return View();
         }
+
+        public IActionResult TopCoinsByPriceChartView()
+        {
+            return View();
+        }
     }
 }

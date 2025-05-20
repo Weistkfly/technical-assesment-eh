@@ -352,5 +352,99 @@ namespace CryptoPriceTracker.Api.Services
 
             return new TrendViewModel(direction, Math.Round(percentageChange, 2));
         }
+
+        // Tentative structure for CryptoPriceTracker.Api.Models.PriceDataPoint
+        // public class PriceDataPoint
+        // {
+        //     public DateTime Date { get; set; }
+        //     public decimal Price { get; set; }
+        // }
+
+        // Tentative structure for CryptoPriceTracker.Api.Models.CoinChartViewModel
+        // public class CoinChartViewModel
+        // {
+        //     public string CoinName { get; set; }
+        //     public string CoinSymbol { get; set; }
+        //     public List<PriceDataPoint> PriceHistory { get; set; }
+        // }
+
+        public async Task<List<CoinChartViewModel>> GetTopNCoinsByPriceAsync(int count, CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Fetching top {Count} coins by latest price.", count);
+
+            if (count <= 0)
+            {
+                _logger.LogWarning("Requested count for top N coins is zero or negative: {Count}. Returning empty list.", count);
+                return new List<CoinChartViewModel>();
+            }
+
+            var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
+
+            // Step 1: Fetch all assets and their single latest price
+            var assetsWithLatestPrice = await _dbContext.CryptoAssets
+                .AsNoTracking()
+                .Select(asset => new
+                {
+                    asset.Id,
+                    asset.Name,
+                    asset.Symbol,
+                    LatestPriceEntry = asset.PriceHistory
+                                        .OrderByDescending(ph => ph.Date)
+                                        .Select(ph => new { ph.Price, ph.Date }) // Select only what's needed
+                                        .FirstOrDefault()
+                })
+                .Where(asset => asset.LatestPriceEntry != null) // Ensure there is a price history
+                .ToListAsync(cancellationToken);
+
+            // Step 2: Sort by the latest price and take top N
+            var topNAssets = assetsWithLatestPrice
+                .OrderByDescending(asset => asset.LatestPriceEntry!.Price)
+                .Take(count)
+                .ToList();
+
+            if (!topNAssets.Any())
+            {
+                _logger.LogInformation("No assets found with price history, or top N list is empty after sorting. Returning empty list.");
+                return new List<CoinChartViewModel>();
+            }
+            
+            _logger.LogInformation("Identified {TopNCount} assets to fetch detailed history for.", topNAssets.Count);
+
+            var resultViewModels = new List<CoinChartViewModel>();
+
+            foreach (var assetInfo in topNAssets)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                // Step 3: Gather price history for the last 30 days for each top N coin
+                // Group by Date to get one entry per day (average price for that day)
+                var dailyPriceHistory = await _dbContext.CryptoPriceHistories
+                    .AsNoTracking()
+                    .Where(ph => ph.CryptoAssetId == assetInfo.Id && ph.Date >= thirtyDaysAgo)
+                    .GroupBy(ph => ph.Date.Date) // Group by the date part only
+                    .Select(g => new PriceDataPoint 
+                    { 
+                        Date = g.Key, 
+                        Price = g.Average(p => p.Price) // Taking average for the day
+                    })
+                    .OrderBy(pdp => pdp.Date)
+                    .ToListAsync(cancellationToken);
+                
+                if (!dailyPriceHistory.Any())
+                {
+                     _logger.LogDebug("No price history found in the last 30 days for asset {AssetName} (ID: {AssetId}). It will have an empty history list.", assetInfo.Name, assetInfo.Id);
+                }
+
+                resultViewModels.Add(new CoinChartViewModel
+                {
+                    CoinName = assetInfo.Name,
+                    CoinSymbol = assetInfo.Symbol,
+                    PriceHistory = dailyPriceHistory
+                });
+            }
+
+            _logger.LogInformation("Successfully processed {Count} view models for top N coins by price.", resultViewModels.Count);
+            return resultViewModels;
+        }
     }
 }
