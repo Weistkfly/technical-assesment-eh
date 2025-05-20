@@ -799,3 +799,81 @@ body {
     flex: 0 0 100%;
     max-width: 100%;
 }
+
+/* --- Navbar --- */
+.site-navbar {
+    background-color: var(--secondary-bg-color); /* Or --primary-bg-color depending on desired prominence */
+    /* border-bottom is already handled by existing .border-bottom class from _Layout.cshtml,
+       but can be reinforced or customized here if needed.
+       Example: border-bottom: 1px solid var(--border-color); */
+}
+
+.site-navbar-brand {
+    color: var(--primary-accent-color) !important; /* Ensure override if other general 'a' tags have different color */
+    font-weight: 600; 
+}
+    .site-navbar-brand:hover,
+    .site-navbar-brand:focus {
+        color: var(--primary-accent-color) !important;
+        opacity: 0.85;
+    }
+
+.site-navbar-link {
+    color: var(--text-color); 
+    padding: 0.5rem 0.75rem; /* Adjusted padding slightly for typical nav links */
+}
+    .site-navbar-link:hover,
+    .site-navbar-link:focus {
+        color: var(--primary-accent-color); 
+        background-color: transparent; 
+    }
+    .site-navbar-link.active { /* Example active state */
+        color: var(--primary-accent-color);
+        font-weight: 500;
+        border-bottom: 2px solid var(--primary-accent-color); /* Example active indicator */
+        padding-bottom: calc(0.5rem - 2px); /* Adjust padding to keep height consistent */
+    }
+
+.site-navbar-toggler {
+    border-color: rgba(0,0,0,0.1); /* Default Bootstrap toggler border, can be var(--border-color) */
+}
+    /* Styling for the navbar-toggler-icon inside the button */
+    .site-navbar .navbar-toggler-icon { /* Increased specificity */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(0, 0, 0, 0.55)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    }
+
+/* Dark theme adjustments for navbar */
+[data-theme="dark"] .site-navbar {
+    background-color: var(--secondary-bg-color); 
+    /* border-bottom: 1px solid var(--border-color); */
+}
+
+[data-theme="dark"] .site-navbar-brand {
+    color: var(--primary-accent-color) !important;
+}
+    [data-theme="dark"] .site-navbar-brand:hover,
+    [data-theme="dark"] .site-navbar-brand:focus {
+        color: var(--primary-accent-color) !important;
+        opacity: 0.85;
+    }
+
+[data-theme="dark"] .site-navbar-link {
+    color: var(--text-color);
+}
+    [data-theme="dark"] .site-navbar-link:hover,
+    [data-theme="dark"] .site-navbar-link:focus {
+        color: var(--primary-accent-color);
+    }
+    [data-theme="dark"] .site-navbar-link.active {
+        color: var(--primary-accent-color);
+        border-bottom-color: var(--primary-accent-color);
+    }
+
+[data-theme="dark"] .site-navbar-toggler {
+    border-color: rgba(255,255,255,0.1); /* Default Bootstrap dark toggler border, can be var(--border-color) */
+}
+    [data-theme="dark"] .site-navbar .navbar-toggler-icon { /* Increased specificity */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.55)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+    }
+
+/* End Navbar */
